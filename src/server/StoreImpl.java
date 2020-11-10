@@ -282,6 +282,9 @@ public class StoreImpl extends Thread {
 					String newItemID = factory.nextToken();
 					result = exchangeItem(customerID, oldItemID, newItemID);
 				}
+				else if (command.equals("exit")) {
+					break;
+				}
 				else {
 					result = "Command not recognized.";
 				}

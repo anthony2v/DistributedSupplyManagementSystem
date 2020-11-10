@@ -190,7 +190,9 @@ public class StoreClient {
 		finally {
 			System.out.println("Do you want to shutdown the server (y/n)?");
 			String doShutdown = userInput.next();
-			if (doShutdown.equals("y")) {}
+			if (doShutdown.equals("y")) {
+				currentUser.remoteMethodInvocation("exit");
+			}
 			else if (doShutdown.equals("n"))
 				System.out.println("Server will not shutdown.");
 			else
