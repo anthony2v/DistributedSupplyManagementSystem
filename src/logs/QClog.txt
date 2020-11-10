@@ -1,17 +1,1 @@
-2020-10-27T16:09:26.141: Server is started
-2020-10-27T16:09:47.802: Request to add item with arguments QCM1234, QC6231, DS, 2, and 30.
-2020-10-27T16:09:47.803: Server answer: Add operation successful.
-2020-10-27T16:10:05.439: Request to add item with arguments QCM1234, QC6651, ADT, 2, and 30.
-2020-10-27T16:10:05.440: Server answer: Add operation successful.
-2020-10-27T16:10:12.817: Request to list server item availability with argument QCM1234.
-2020-10-27T16:10:12.817: Server answer: QC6651 2 30 QC6231 2 30 
-2020-10-27T16:11:21.777: Request to find item with arguments QCU1234, and DS.
-2020-10-27T16:11:21.777: Server answer: QC6231 2 30
-2020-10-27T16:11:29.502: Request to purchase item with arguments QCU1234, and QC6231.
-2020-10-27T16:11:29.502: Server answer: Purchase successful. You have $970 remaining.
-2020-10-27T16:11:43.509: Request to find item with arguments QCU1234, and ADT.
-2020-10-27T16:11:43.509: Server answer: QC6651 2 30
-2020-10-27T16:11:53.567: Request to exchange items with arguments QCU1234, QC6651, and QC6231.
-2020-10-27T16:11:53.567: Server answer: Exchange successful. You have $970 remaining.
-2020-10-27T16:12:02.250: Request to return item with arguments QCU1234, and QC6651.
-2020-10-27T16:12:02.250: Server answer: Return successful. You have $1000 remaining.
+2020-11-09T22:10:01.991: Server is started

@@ -7,16 +7,11 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.time.LocalDateTime;
 import java.util.*;
-import org.omg.CosNaming.*;
-import org.omg.CORBA.*;
-import StoreApp.*;
-
 public class StoreClient {
 	
 	private String userID;
 	private String locationID;
 	private PrintWriter systemLog;
-	private static Store storeImpl;
 	
 	public StoreClient(String userID) {
 		this.userID = userID;
@@ -97,7 +92,8 @@ public class StoreClient {
 					int quantity = Integer.parseInt(arguments.nextToken());
 					int price = Integer.parseInt(arguments.nextToken());
 					systemLog.println("called with arguments " + userID + ", " + itemID + ", " + itemName + ", " + quantity + ", and " + price + ".");
-					result = storeImpl.addItem(userID, itemID, itemName, quantity, price);
+					//result = storeImpl.addItem(userID, itemID, itemName, quantity, price);
+					result = remoteMethodInvocation("addItem " + itemID);
 					System.out.println(result);
 					systemLog.println(LocalDateTime.now() + ": " + locationID + " server answer: " + result);
 				}
@@ -106,13 +102,13 @@ public class StoreClient {
 					String itemID = arguments.nextToken();
 					int quantity = Integer.parseInt(arguments.nextToken());
 					systemLog.println("called with arguments " + userID + ", " + itemID + ", and " + quantity);
-					result = storeImpl.removeItem(userID, itemID, quantity);
+					//result = storeImpl.removeItem(userID, itemID, quantity);
 					System.out.println(result);
 					systemLog.println(LocalDateTime.now() + ": " + locationID + " server answer: " + result);
 				}
 				else if (command.equals("listItemAvailability")) {
 					systemLog.println("called with argument " + userID);
-					result = storeImpl.listItemAvailability(userID);
+					//result = storeImpl.listItemAvailability(userID);
 					System.out.println(result);
 					systemLog.println(LocalDateTime.now() + ": " + locationID + " server answer: " + result);
 				}
@@ -120,13 +116,13 @@ public class StoreClient {
 					arguments = new StringTokenizer(userInput.nextLine());
 					String itemID = arguments.nextToken();
 					systemLog.println("called with arguments " + userID + ", and " + itemID + ".");
-					result = storeImpl.purchaseItem(userID, itemID);
+					//result = storeImpl.purchaseItem(userID, itemID);
 					System.out.println(result);
 					systemLog.println(new Date() + ": " + locationID + " server answer: " + result);
 					if (result.contains("unavailable")) {
 						String reserveResponse = userInput.next();
 						systemLog.println(LocalDateTime.now() + ": purchaseItemResponse called with arguments " + reserveResponse + ", " + itemID + ", and " + userID);
-						result = storeImpl.purchaseItemResponse(reserveResponse, itemID, userID);
+						//result = storeImpl.purchaseItemResponse(reserveResponse, itemID, userID);
 						System.out.println(result);
 						systemLog.println(LocalDateTime.now() + ": " + locationID + " server answer: " + result);
 					}
@@ -135,7 +131,7 @@ public class StoreClient {
 					arguments = new StringTokenizer(userInput.nextLine());
 					String itemName = arguments.nextToken();
 					systemLog.println("called with argument " + itemName);
-					result = storeImpl.findItem(userID, itemName);
+					//result = storeImpl.findItem(userID, itemName);
 					System.out.println(result);
 					systemLog.println(LocalDateTime.now() + ": " + locationID + " server answer: " + result);
 				}
@@ -143,7 +139,7 @@ public class StoreClient {
 					arguments = new StringTokenizer(userInput.nextLine());
 					String itemID = arguments.nextToken();
 					systemLog.println("called with arguments " + userID + ", and " + itemID + ".");
-					result = storeImpl.returnItem(userID, itemID);
+					//result = storeImpl.returnItem(userID, itemID);
 					System.out.println(result);
 					systemLog.println(LocalDateTime.now() + ": " + locationID + " server answer: " + result);
 					if (result.contains("successful")) {
@@ -155,7 +151,7 @@ public class StoreClient {
 					String oldItemID = arguments.nextToken();
 					String newItemID = arguments.nextToken();
 					systemLog.println("called with arguments " + userID + ", " + oldItemID + ", and " + newItemID + ".");
-					result = storeImpl.exchangeItem(userID, oldItemID, newItemID);
+					//result = storeImpl.exchangeItem(userID, oldItemID, newItemID);
 					System.out.println(result);
 					systemLog.println(LocalDateTime.now() + ": " + locationID + " server answer: " + result);
 				}
@@ -184,11 +180,6 @@ public class StoreClient {
 		String userID = userInput.next();
 		StoreClient currentUser = new StoreClient(userID);
 		try {
-			ORB orb = ORB.init(args, null);
-			org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");
-			NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
-			String name = currentUser.getLocationID() + "-STORE";
-			storeImpl = StoreHelper.narrow(ncRef.resolve_str(name));
 			//System.out.println("Obtained a handle on server object: " + storeImpl);
 			currentUser.processCommands(userInput);
 		}
@@ -199,8 +190,7 @@ public class StoreClient {
 		finally {
 			System.out.println("Do you want to shutdown the server (y/n)?");
 			String doShutdown = userInput.next();
-			if (doShutdown.equals("y"))
-				storeImpl.shutdown();
+			if (doShutdown.equals("y")) {}
 			else if (doShutdown.equals("n"))
 				System.out.println("Server will not shutdown.");
 			else

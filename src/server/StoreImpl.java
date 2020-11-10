@@ -5,17 +5,12 @@ import java.net.*;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentSkipListMap;
 
-import org.omg.CORBA.*;
-import StoreApp.*;
-
-public class StoreImpl extends StorePOA implements Runnable {
+public class StoreImpl extends Thread {
 	
 	private int portNumber;
 	private Map<String, Product> inventory;
 	private Map<String, Queue<String>> waitList;
-	private ORB orb;
 	private PrintWriter log;
 	private String serverID;
 	private TreeMap<String, Integer> wallets;
@@ -40,10 +35,6 @@ public class StoreImpl extends StorePOA implements Runnable {
 	
 	public int getPortNumber() {
 		return portNumber;
-	}
-	
-	public void setORB(ORB orbValue) {
-		this.orb = orbValue;
 	}
 	
 	public String addItem(String managerID, String itemID, String itemName, int quantity, int price) {
@@ -274,17 +265,18 @@ public class StoreImpl extends StorePOA implements Runnable {
 				socket.receive(request);
 				String result = new String(request.getData());
 				StringTokenizer factory = new StringTokenizer(result);
-				if (factory.nextToken().equals("findItem")) {
+				String command = factory.nextToken();
+				if (command.equals("findItem")) {
 					String customerID = factory.nextToken();
 					String itemName = factory.nextToken();
 					result = findItem(customerID, itemName);
 				}
-				else if (factory.nextToken().equals("purchaseItem")) {
+				else if (command.equals("purchaseItem")) {
 					String customerID = factory.nextToken();
 					String itemID = factory.nextToken();
 					result = purchaseItem(customerID, itemID);
 				}
-				else if (factory.nextToken().equals("exchangeItem")) {
+				else if (command.equals("exchangeItem")) {
 					String customerID = factory.nextToken();
 					String oldItemID = factory.nextToken();
 					String newItemID = factory.nextToken();
@@ -308,9 +300,5 @@ public class StoreImpl extends StorePOA implements Runnable {
 			if(socket != null) 
 				socket.close();
 		}
-	}
-	
-	public void shutdown() {
-		this.orb.shutdown(true);
 	}
 }
