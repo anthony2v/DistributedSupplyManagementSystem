@@ -1,0 +1,8 @@
+2020-10-27T16:09:32.985: Successful login to QC server.
+2020-10-27T16:09:47.798: addItem called with arguments QCM1234, QC6231, DS, 2, and 30.
+2020-10-27T16:09:47.806: QC server answer: Add operation successful.
+2020-10-27T16:10:05.438: addItem called with arguments QCM1234, QC6651, ADT, 2, and 30.
+2020-10-27T16:10:05.440: QC server answer: Add operation successful.
+2020-10-27T16:10:12.816: listItemAvailability called with argument QCM1234
+2020-10-27T16:10:12.818: QC server answer: QC6651 2 30 QC6231 2 30 
+2020-10-27T16:11:08.785: exit called. Program terminated.

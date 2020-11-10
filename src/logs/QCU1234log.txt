@@ -1,0 +1,11 @@
+2020-10-27T16:11:17.764: Successful login to QC server.
+2020-10-27T16:11:21.774: findItem called with argument DS
+2020-10-27T16:11:21.778: QC server answer: QC6231 2 30
+2020-10-27T16:11:29.501: purchaseItem called with arguments QCU1234, and QC6231.
+Tue Oct 27 16:11:29 EDT 2020: QC server answer: Purchase successful. You have $970 remaining.
+2020-10-27T16:11:43.508: findItem called with argument ADT
+2020-10-27T16:11:43.510: QC server answer: QC6651 2 30
+2020-10-27T16:11:53.565: exchangeItem called with arguments QCU1234, QC6231, and QC6651.
+2020-10-27T16:11:53.568: QC server answer: Exchange successful. You have $970 remaining.
+2020-10-27T16:12:02.249: returnItem called with arguments QCU1234, and QC6651.
+2020-10-27T16:12:02.251: QC server answer: Return successful. You have $1000 remaining.
