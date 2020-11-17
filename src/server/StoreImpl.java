@@ -266,7 +266,15 @@ public class StoreImpl extends Thread {
 				String result = new String(request.getData());
 				StringTokenizer factory = new StringTokenizer(result);
 				String command = factory.nextToken();
-				if (command.equals("findItem")) {
+				if (command.equals("addItem")) {
+					String managerID = factory.nextToken();
+					String itemID = factory.nextToken();
+					String itemName = factory.nextToken();
+					int quantity = Integer.parseInt(factory.nextToken());
+					int price = Integer.parseInt(factory.nextToken());
+					result = addItem(managerID, itemID, itemName, quantity, price);
+				}
+				else if (command.equals("findItem")) {
 					String customerID = factory.nextToken();
 					String itemName = factory.nextToken();
 					result = findItem(customerID, itemName);

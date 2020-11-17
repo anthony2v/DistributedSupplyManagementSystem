@@ -93,7 +93,7 @@ public class StoreClient {
 					int price = Integer.parseInt(arguments.nextToken());
 					systemLog.println("called with arguments " + userID + ", " + itemID + ", " + itemName + ", " + quantity + ", and " + price + ".");
 					//result = storeImpl.addItem(userID, itemID, itemName, quantity, price);
-					result = remoteMethodInvocation("addItem " + itemID);
+					result = remoteMethodInvocation(command + " " + userID + " " + itemID + " " + itemName + " " + quantity + " " + price + " ");
 					System.out.println(result);
 					systemLog.println(LocalDateTime.now() + ": " + locationID + " server answer: " + result);
 				}
