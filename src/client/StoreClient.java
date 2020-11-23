@@ -157,6 +157,7 @@ public class StoreClient {
 					String newItemID = arguments.nextToken();
 					systemLog.println("called with arguments " + userID + ", " + oldItemID + ", and " + newItemID + ".");
 					//result = storeImpl.exchangeItem(userID, oldItemID, newItemID);
+					result = remoteMethodInvocation(command + " " + userID + " " + oldItemID + " " + newItemID + " ");
 					System.out.println(result);
 					systemLog.println(LocalDateTime.now() + ": " + locationID + " server answer: " + result);
 				}
