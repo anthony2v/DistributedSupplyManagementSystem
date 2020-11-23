@@ -274,6 +274,16 @@ public class StoreImpl extends Thread {
 					int price = Integer.parseInt(factory.nextToken());
 					result = addItem(managerID, itemID, itemName, quantity, price);
 				}
+				else if (command.equals("listItemAvailability")) {
+					String managerID = factory.nextToken();
+					result = listItemAvailability(managerID);
+				}
+				else if (command.equals("removeItem")) {
+					String managerID = factory.nextToken();
+					String itemID = factory.nextToken();
+					int quantity = Integer.parseInt(factory.nextToken());
+					result = removeItem(managerID, itemID, quantity);
+				}
 				else if (command.equals("findItem")) {
 					String customerID = factory.nextToken();
 					String itemName = factory.nextToken();

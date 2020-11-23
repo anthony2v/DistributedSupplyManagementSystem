@@ -103,11 +103,13 @@ public class StoreClient {
 					int quantity = Integer.parseInt(arguments.nextToken());
 					systemLog.println("called with arguments " + userID + ", " + itemID + ", and " + quantity);
 					//result = storeImpl.removeItem(userID, itemID, quantity);
+					result = remoteMethodInvocation(command + " " + userID + " " + itemID + " " + quantity + " ");
 					System.out.println(result);
 					systemLog.println(LocalDateTime.now() + ": " + locationID + " server answer: " + result);
 				}
 				else if (command.equals("listItemAvailability")) {
 					systemLog.println("called with argument " + userID);
+					result = remoteMethodInvocation(command + " " + userID + " ");
 					//result = storeImpl.listItemAvailability(userID);
 					System.out.println(result);
 					systemLog.println(LocalDateTime.now() + ": " + locationID + " server answer: " + result);
