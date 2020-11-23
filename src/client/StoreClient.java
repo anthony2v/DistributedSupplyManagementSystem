@@ -57,7 +57,7 @@ public class StoreClient {
 			byte[] buffer = new byte[1000];
 			DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
 			aSocket.receive(reply);
-			receivedData = new String(reply.getData());
+			receivedData = new String(reply.getData()).trim();
 		} catch (SocketException e){
 			System.out.println("Socket: " + e.getMessage());
 		} catch (IOException e){
@@ -119,6 +119,7 @@ public class StoreClient {
 					String itemID = arguments.nextToken();
 					systemLog.println("called with arguments " + userID + ", and " + itemID + ".");
 					//result = storeImpl.purchaseItem(userID, itemID);
+					result = remoteMethodInvocation(command + " " + userID + " " + itemID + " ");
 					System.out.println(result);
 					systemLog.println(new Date() + ": " + locationID + " server answer: " + result);
 					if (result.contains("unavailable")) {
@@ -134,6 +135,7 @@ public class StoreClient {
 					String itemName = arguments.nextToken();
 					systemLog.println("called with argument " + itemName);
 					//result = storeImpl.findItem(userID, itemName);
+					result = remoteMethodInvocation(command + " " + userID + " " + itemName + " ");
 					System.out.println(result);
 					systemLog.println(LocalDateTime.now() + ": " + locationID + " server answer: " + result);
 				}
@@ -142,6 +144,7 @@ public class StoreClient {
 					String itemID = arguments.nextToken();
 					systemLog.println("called with arguments " + userID + ", and " + itemID + ".");
 					//result = storeImpl.returnItem(userID, itemID);
+					result = remoteMethodInvocation(command + " " + userID + " " + itemID + " ");
 					System.out.println(result);
 					systemLog.println(LocalDateTime.now() + ": " + locationID + " server answer: " + result);
 					if (result.contains("successful")) {

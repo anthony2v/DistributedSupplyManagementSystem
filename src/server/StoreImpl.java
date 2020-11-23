@@ -294,6 +294,11 @@ public class StoreImpl extends Thread {
 					String itemID = factory.nextToken();
 					result = purchaseItem(customerID, itemID);
 				}
+				else if (command.equals("returnItem")) {
+					String customerID = factory.nextToken();
+					String itemID = factory.nextToken();
+					result = returnItem(customerID, itemID);
+				}
 				else if (command.equals("exchangeItem")) {
 					String customerID = factory.nextToken();
 					String oldItemID = factory.nextToken();
