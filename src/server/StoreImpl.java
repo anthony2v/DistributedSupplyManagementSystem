@@ -108,6 +108,15 @@ public class StoreImpl extends Thread {
 		log.println(LocalDateTime.now() + ": Request to purchase item with arguments " + customerID + ", and " + itemID + ".");
 		if(customerID.charAt(2) != 'U')
 			toReturn += "This ID is not a customer, access denied.";
+		else if(serverID.charAt(0) != customerID.charAt(0) && serverID.charAt(1) != customerID.charAt(1)) {
+			// assume for now that remote items are always in stock
+			synchronized(this) {
+				Product itemToPurchase = inventory.get(itemID);
+				itemToPurchase.setQuantity(inventory.get(itemID).getQuantity() - 1);
+				itemToPurchase.getPurchaseHistory().put(customerID, LocalDateTime.now());
+				toReturn += "Purchase successful.";
+			}
+		}
 		else {
 			if (serverID.charAt(0) == customerID.charAt(0) && serverID.charAt(1) == customerID.charAt(1) && !wallets.containsKey(customerID)) {
 				wallets.put(customerID, 1000);
@@ -123,28 +132,15 @@ public class StoreImpl extends Thread {
 					toReturn += "Purchase successful. You have $" + budget + " remaining.";
 				}
 			}
-			else {
-				toReturn += "Item unavailable, do you want to be placed on the waiting list for this item?";
+			else if (doWaitlist) {
+				Queue<String> itemWaitList = new ConcurrentLinkedQueue<String>();
+				itemWaitList.add(customerID);
+				waitList.put(itemID, itemWaitList);
+				toReturn += "Item unavailable. Successful added " + customerID + " to queue.";
 			}
-		}
-		log.println(LocalDateTime.now() + ": Server answer: " + toReturn);
-		log.flush();
-		return toReturn;
-	}
-	
-	public String purchaseItemResponse(String answer, String itemID, String customerID) {
-		String toReturn = "";
-		if (answer.equals("Yes")) {
-			Queue<String> itemWaitList = new ConcurrentLinkedQueue<String>();
-			itemWaitList.add(customerID);
-			waitList.put(itemID, itemWaitList);
-			toReturn += "Successful added " + customerID + " to queue.";
-		}
-		else if (answer.equals("No")) {
-			toReturn += "No action taken.";
-		}
-		else {
-			toReturn += "Answer not recognized, no action taken.";
+			else {
+				toReturn += "Item unavailable. " + customerID + " not added to queue.";
+			}
 		}
 		log.println(LocalDateTime.now() + ": Server answer: " + toReturn);
 		log.flush();
@@ -211,14 +207,14 @@ public class StoreImpl extends Thread {
 					Queue<String> itemWaitList = new ConcurrentLinkedQueue<String>();
 					itemWaitList.add(customerID);
 					waitList.put(newItemID, itemWaitList);
-					toReturn += "Successful added " + customerID + " to queue.";
+					toReturn += "Successful added " + customerID + " to queue. ";
 				}
 				else {
 					itemToPurchase.setQuantity(inventory.get(newItemID).getQuantity() - 1);
 					itemToPurchase.getPurchaseHistory().put(customerID, LocalDateTime.now());
 					budget -= inventory.get(newItemID).getPrice();
-					wallets.put(customerID, budget);
 				}
+				wallets.put(customerID, budget);
 				toReturn += "Exchange successful. You have $" + budget + " remaining.";
 			}
 		}
@@ -310,6 +306,18 @@ public class StoreImpl extends Thread {
 				else if (command.equals("purchaseItem")) {
 					String customerID = factory.nextToken();
 					String itemID = factory.nextToken();
+					String locationID = new String();
+					locationID += itemID.charAt(0);
+					locationID += itemID.charAt(1);
+					if (!serverID.equals(locationID)) {
+						if (locationID.equals("QC"))
+							serverReply += getFromOtherStores(clientRequest, 6789);
+						if (locationID.equals("ON"))
+							serverReply += getFromOtherStores(clientRequest, 5678);
+						if (locationID.equals("BC"))
+							serverReply += getFromOtherStores(clientRequest, 4567);
+					}
+					else
 					serverReply = purchaseItem(customerID, itemID, true);
 				}
 				else if (command.equals("returnItem")) {
