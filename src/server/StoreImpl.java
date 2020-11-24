@@ -53,7 +53,7 @@ public class StoreImpl extends Thread {
 			if (waitList.containsKey(itemID)) {
 				Queue<String> itemQueue = waitList.get(itemID);
 				for(String customer: itemQueue) {
-					purchaseItem(customer, itemID);
+					purchaseItem(customer, itemID, true);
 				}
 				for(int i = 0; i < itemQueue.size(); ++i) {
 					itemQueue.remove();
@@ -103,7 +103,7 @@ public class StoreImpl extends Thread {
 		return toReturn;
 	}
 	
-	public String purchaseItem(String customerID, String itemID) {
+	public String purchaseItem(String customerID, String itemID, boolean doWaitlist) {
 		String toReturn = "";
 		log.println(LocalDateTime.now() + ": Request to purchase item with arguments " + customerID + ", and " + itemID + ".");
 		if(customerID.charAt(2) != 'U')
@@ -195,14 +195,11 @@ public class StoreImpl extends Thread {
 		return toReturn;
 	}
 	
-	public String exchangeItem(String customerID, String oldItemID, String newItemID) {
+	public String exchangeItem(String customerID, String oldItemID, String newItemID, boolean doWaitlist) {
 		String toReturn = "";
 		log.println(LocalDateTime.now() + ": Request to exchange items with arguments " + customerID + ", " + newItemID + ", and " + oldItemID + ".");
 		if (!wallets.containsKey(customerID)) {
 			toReturn += "The client has not purchased any items at this store.";
-		}
-		else if (!inventory.containsKey(newItemID) || !inventory.containsKey(oldItemID)) {
-			toReturn += "One of the items is no longer available in the store.";
 		}
 		else {
 			synchronized(this) {
@@ -210,10 +207,18 @@ public class StoreImpl extends Thread {
 				int budget = wallets.get(customerID);
 				budget += inventory.get(oldItemID).getPrice();
 				Product itemToPurchase = inventory.get(newItemID);
-				itemToPurchase.setQuantity(inventory.get(newItemID).getQuantity() - 1);
-				itemToPurchase.getPurchaseHistory().put(customerID, LocalDateTime.now());
-				budget -= inventory.get(newItemID).getPrice();
-				wallets.put(customerID, budget);
+				if (itemToPurchase == null) {
+					Queue<String> itemWaitList = new ConcurrentLinkedQueue<String>();
+					itemWaitList.add(customerID);
+					waitList.put(newItemID, itemWaitList);
+					toReturn += "Successful added " + customerID + " to queue.";
+				}
+				else {
+					itemToPurchase.setQuantity(inventory.get(newItemID).getQuantity() - 1);
+					itemToPurchase.getPurchaseHistory().put(customerID, LocalDateTime.now());
+					budget -= inventory.get(newItemID).getPrice();
+					wallets.put(customerID, budget);
+				}
 				toReturn += "Exchange successful. You have $" + budget + " remaining.";
 			}
 		}
@@ -305,7 +310,7 @@ public class StoreImpl extends Thread {
 				else if (command.equals("purchaseItem")) {
 					String customerID = factory.nextToken();
 					String itemID = factory.nextToken();
-					serverReply = purchaseItem(customerID, itemID);
+					serverReply = purchaseItem(customerID, itemID, true);
 				}
 				else if (command.equals("returnItem")) {
 					String customerID = factory.nextToken();
@@ -316,7 +321,7 @@ public class StoreImpl extends Thread {
 					String customerID = factory.nextToken();
 					String oldItemID = factory.nextToken();
 					String newItemID = factory.nextToken();
-					serverReply = exchangeItem(customerID, oldItemID, newItemID);
+					serverReply = exchangeItem(customerID, oldItemID, newItemID, true);
 				}
 				else if (command.equals("exit")) {
 					break;
