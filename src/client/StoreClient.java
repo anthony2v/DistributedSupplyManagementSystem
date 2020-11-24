@@ -11,6 +11,7 @@ public class StoreClient {
 	
 	private String userID;
 	private String locationID;
+	private int serverPort;
 	private PrintWriter systemLog;
 	
 	public StoreClient(String userID) {
@@ -19,6 +20,12 @@ public class StoreClient {
 		locationID += userID.charAt(0);
 		locationID += userID.charAt(1);
 		this.locationID = locationID;
+		if (locationID.equals("QC"))
+			serverPort = 6789;
+		else if (locationID.equals("ON"))
+			serverPort = 5678;
+		else
+			serverPort = 4567;
 		try {
 			systemLog = new PrintWriter(new File("src\\logs\\" + userID + "log.txt"));
 		}
@@ -51,7 +58,6 @@ public class StoreClient {
 			aSocket = new DatagramSocket();
 			byte [] m = command.getBytes();
 			InetAddress aHost = InetAddress.getByName("127.0.0.1");
-			int serverPort = 6789;
 			DatagramPacket request = new DatagramPacket(m, command.length(), aHost, serverPort);
 			aSocket.send(request);
 			byte[] buffer = new byte[1000];

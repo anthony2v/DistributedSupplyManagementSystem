@@ -164,11 +164,6 @@ public class StoreImpl extends Thread {
 				}
 			}
 		}
-//		if (serverID.charAt(0) == customerID.charAt(0) && serverID.charAt(1) == customerID.charAt(1)) {
-//			if (customerID.charAt(0) == 'Q' && customerID.charAt(1) == 'C') {
-//				toReturn = this.getFromOtherStores("findItem " + customerID + " itemName", 5678);
-//			}
-//		}
 		log.println(LocalDateTime.now() + ": Server answer: " + toReturn);
 		log.flush();
 		return toReturn;
@@ -240,7 +235,7 @@ public class StoreImpl extends Thread {
 			byte[] buffer = new byte[1000];
 			DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
 			aSocket.receive(reply);
-			receivedData = (new String(reply.getData()));
+			receivedData = (new String(reply.getData())).trim();
 		}
 		catch (SocketException e){
 			System.out.println("Socket: " + e.getMessage());
@@ -263,8 +258,9 @@ public class StoreImpl extends Thread {
 			while(true){
 				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
 				socket.receive(request);
-				String result = new String(request.getData());
-				StringTokenizer factory = new StringTokenizer(result);
+				String clientRequest = new String(request.getData());
+				String serverReply = new String();
+				StringTokenizer factory = new StringTokenizer(clientRequest);
 				String command = factory.nextToken();
 				if (command.equals("addItem")) {
 					String managerID = factory.nextToken();
@@ -272,47 +268,67 @@ public class StoreImpl extends Thread {
 					String itemName = factory.nextToken();
 					int quantity = Integer.parseInt(factory.nextToken());
 					int price = Integer.parseInt(factory.nextToken());
-					result = addItem(managerID, itemID, itemName, quantity, price);
+					serverReply = addItem(managerID, itemID, itemName, quantity, price);
 				}
 				else if (command.equals("listItemAvailability")) {
 					String managerID = factory.nextToken();
-					result = listItemAvailability(managerID);
+					serverReply = listItemAvailability(managerID);
 				}
 				else if (command.equals("removeItem")) {
 					String managerID = factory.nextToken();
 					String itemID = factory.nextToken();
 					int quantity = Integer.parseInt(factory.nextToken());
-					result = removeItem(managerID, itemID, quantity);
+					serverReply = removeItem(managerID, itemID, quantity);
 				}
 				else if (command.equals("findItem")) {
 					String customerID = factory.nextToken();
 					String itemName = factory.nextToken();
-					result = findItem(customerID, itemName);
+					serverReply = findItem(customerID, itemName);
+					String locationID = new String();
+					locationID += customerID.charAt(0);
+					locationID += customerID.charAt(1);
+					if (serverID.equals(locationID)) {
+						if (portNumber != 6789) {
+							serverReply += " ";
+							serverReply += getFromOtherStores(clientRequest, 6789);
+						}
+						if (portNumber != 5678) {
+							serverReply += " ";
+							serverReply += getFromOtherStores(clientRequest, 5678);
+						}
+						if (portNumber != 4567) {
+							serverReply += " ";
+							serverReply += getFromOtherStores(clientRequest, 4567);
+						}
+					}
 				}
 				else if (command.equals("purchaseItem")) {
 					String customerID = factory.nextToken();
 					String itemID = factory.nextToken();
-					result = purchaseItem(customerID, itemID);
+					serverReply = purchaseItem(customerID, itemID);
 				}
 				else if (command.equals("returnItem")) {
 					String customerID = factory.nextToken();
 					String itemID = factory.nextToken();
-					result = returnItem(customerID, itemID);
+					serverReply = returnItem(customerID, itemID);
 				}
 				else if (command.equals("exchangeItem")) {
 					String customerID = factory.nextToken();
 					String oldItemID = factory.nextToken();
 					String newItemID = factory.nextToken();
-					result = exchangeItem(customerID, oldItemID, newItemID);
+					serverReply = exchangeItem(customerID, oldItemID, newItemID);
 				}
 				else if (command.equals("exit")) {
 					break;
 				}
-				else {
-					result = "Command not recognized.";
+				else if (command.equals("waitlistItem")) {
+					
 				}
-				byte[] m = result.getBytes();
-				DatagramPacket reply = new DatagramPacket(m, result.length(), request.getAddress(), request.getPort());
+				else {
+					serverReply = "Command not recognized.";
+				}
+				byte[] m = serverReply.getBytes();
+				DatagramPacket reply = new DatagramPacket(m, serverReply.length(), request.getAddress(), request.getPort());
 				socket.send(reply);
 			}
 		}
