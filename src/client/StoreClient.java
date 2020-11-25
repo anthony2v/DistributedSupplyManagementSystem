@@ -7,14 +7,23 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.time.LocalDateTime;
 import java.util.*;
+
+import server.Store;
+
+import java.net.URL;
+import javax.xml.namespace.QName;
+import javax.xml.ws.Service;
+
 public class StoreClient {
 	
 	private String userID;
 	private String locationID;
 	private int serverPort;
 	private PrintWriter systemLog;
+	URL url;
+	Store store;
 	
-	public StoreClient(String userID) {
+	public StoreClient(String userID) throws Exception {
 		this.userID = userID;
 		String locationID = "";
 		locationID += userID.charAt(0);
@@ -26,6 +35,10 @@ public class StoreClient {
 			serverPort = 5678;
 		else
 			serverPort = 4567;
+		url = new URL("http://localhost:" + serverPort + "/ws/store?wsdl");
+		QName qname = new QName("http://server/", "StoreImplService");
+		Service service = Service.create(url, qname);
+        store = service.getPort(Store.class);
 		try {
 			systemLog = new PrintWriter(new File("src\\logs\\" + userID + "log.txt"));
 		}
@@ -98,8 +111,8 @@ public class StoreClient {
 					int quantity = Integer.parseInt(arguments.nextToken());
 					int price = Integer.parseInt(arguments.nextToken());
 					systemLog.println("called with arguments " + userID + ", " + itemID + ", " + itemName + ", " + quantity + ", and " + price + ".");
-					//result = storeImpl.addItem(userID, itemID, itemName, quantity, price);
-					result = remoteMethodInvocation(command + " " + userID + " " + itemID + " " + itemName + " " + quantity + " " + price + " ");
+					result = store.addItem(userID, itemID, itemName, quantity, price);
+					//result = remoteMethodInvocation(command + " " + userID + " " + itemID + " " + itemName + " " + quantity + " " + price + " ");
 					System.out.println(result);
 					systemLog.println(LocalDateTime.now() + ": " + locationID + " server answer: " + result);
 				}
@@ -108,15 +121,15 @@ public class StoreClient {
 					String itemID = arguments.nextToken();
 					int quantity = Integer.parseInt(arguments.nextToken());
 					systemLog.println("called with arguments " + userID + ", " + itemID + ", and " + quantity);
-					//result = storeImpl.removeItem(userID, itemID, quantity);
-					result = remoteMethodInvocation(command + " " + userID + " " + itemID + " " + quantity + " ");
+					result = store.removeItem(userID, itemID, quantity);
+					//result = remoteMethodInvocation(command + " " + userID + " " + itemID + " " + quantity + " ");
 					System.out.println(result);
 					systemLog.println(LocalDateTime.now() + ": " + locationID + " server answer: " + result);
 				}
 				else if (command.equals("listItemAvailability")) {
 					systemLog.println("called with argument " + userID);
-					result = remoteMethodInvocation(command + " " + userID + " ");
-					//result = storeImpl.listItemAvailability(userID);
+					result = store.listItemAvailability(userID);
+					//result = remoteMethodInvocation(command + " " + userID + " ");
 					System.out.println(result);
 					systemLog.println(LocalDateTime.now() + ": " + locationID + " server answer: " + result);
 				}
@@ -124,8 +137,8 @@ public class StoreClient {
 					arguments = new StringTokenizer(userInput.nextLine());
 					String itemID = arguments.nextToken();
 					systemLog.println("called with arguments " + userID + ", and " + itemID + ".");
-					//result = storeImpl.purchaseItem(userID, itemID);
-					result = remoteMethodInvocation(command + " " + userID + " " + itemID + " ");
+					result = store.purchaseItem(userID, itemID, true);
+					//result = remoteMethodInvocation(command + " " + userID + " " + itemID + " ");
 					System.out.println(result);
 					systemLog.println(new Date() + ": " + locationID + " server answer: " + result);
 					if (result.contains("unavailable")) {
@@ -140,8 +153,8 @@ public class StoreClient {
 					arguments = new StringTokenizer(userInput.nextLine());
 					String itemName = arguments.nextToken();
 					systemLog.println("called with argument " + itemName);
-					//result = storeImpl.findItem(userID, itemName);
-					result = remoteMethodInvocation(command + " " + userID + " " + itemName + " ");
+					//result = remoteMethodInvocation(command + " " + userID + " " + itemName + " ");
+					result = store.findItem(userID, itemName);
 					System.out.println(result);
 					systemLog.println(LocalDateTime.now() + ": " + locationID + " server answer: " + result);
 				}
@@ -149,8 +162,8 @@ public class StoreClient {
 					arguments = new StringTokenizer(userInput.nextLine());
 					String itemID = arguments.nextToken();
 					systemLog.println("called with arguments " + userID + ", and " + itemID + ".");
-					//result = storeImpl.returnItem(userID, itemID);
-					result = remoteMethodInvocation(command + " " + userID + " " + itemID + " ");
+					//result = remoteMethodInvocation(command + " " + userID + " " + itemID + " ");
+					result = store.returnItem(userID, itemID);
 					System.out.println(result);
 					systemLog.println(LocalDateTime.now() + ": " + locationID + " server answer: " + result);
 					if (result.contains("successful")) {
@@ -162,8 +175,8 @@ public class StoreClient {
 					String oldItemID = arguments.nextToken();
 					String newItemID = arguments.nextToken();
 					systemLog.println("called with arguments " + userID + ", " + oldItemID + ", and " + newItemID + ".");
-					//result = storeImpl.exchangeItem(userID, oldItemID, newItemID);
-					result = remoteMethodInvocation(command + " " + userID + " " + oldItemID + " " + newItemID + " ");
+					result = store.exchangeItem(userID, oldItemID, newItemID, true);
+					//result = remoteMethodInvocation(command + " " + userID + " " + oldItemID + " " + newItemID + " ");
 					System.out.println(result);
 					systemLog.println(LocalDateTime.now() + ": " + locationID + " server answer: " + result);
 				}
@@ -186,14 +199,57 @@ public class StoreClient {
 		}
 	}
 	
+	public void programTest() {
+		System.out.println("---- User: QCM4444 ----");
+		System.out.println("addItem QC1111 Laptop 35 400");
+		System.out.println(store.addItem("QCM4444", "QC1111", "Laptop", 35, 400));
+		System.out.println("listItemAvailability");
+		System.out.println(store.listItemAvailability("QCM4444"));
+		System.out.println("addItem QC6655 Tea 50 40");
+		System.out.println(store.addItem("QCM4444", "QC6655", "Tea", 50, 40));
+		System.out.println("listItemAvailability");
+		System.out.println(store.listItemAvailability("QCM4444"));
+		System.out.println("removeItem QC1111 13");
+		System.out.println(store.removeItem("QCM4444", "QC1111", 13));
+		System.out.println("listItemAvailability");
+		System.out.println(store.listItemAvailability("QCM4444"));
+		System.out.println("---- User: QCU5555 ----");
+		System.out.println("findItem Laptop");
+		System.out.println(store.findItem("QCU5555", "Laptop"));
+		System.out.println("findItem Tea");
+		System.out.println(store.findItem("QCU5555", "Tea"));
+		System.out.println("purchaseItem QC6655 true");
+		System.out.println(store.purchaseItem("QCU5555", "QC6655", true));
+		System.out.println("exchangeItem QC6655 QC1111");
+		System.out.println(store.exchangeItem("QCU5555", "QC6655", "QC1111", true));
+		System.out.println("purchaseItem QC6655 true");
+		System.out.println(store.purchaseItem("QCU5555", "QC6655", true));
+		System.out.println("returnItem QC6655");
+		System.out.println(store.returnItem("QCU5555", "QC6655"));
+		System.out.println("purchaseItem QC7777 true");
+		System.out.println(store.purchaseItem("QCU5555", "QC7777", true));
+		System.out.println("---- User: QCM6767 ----");
+		System.out.println("addItem QC7777 Desktop 60 500");
+		System.out.println(store.addItem("QCM6767", "QC7777", "Desktop", 60, 500));
+		System.out.println("listItemAvailability");
+		System.out.println(store.listItemAvailability("QCM7777"));
+		System.out.println("---- User: QCU5555 ----");
+		System.out.println("purchaseItem QC6655 true");
+		System.out.println(store.purchaseItem("QCU5555", "QC6655", true));
+		System.out.println("returnItem QC7777");
+		System.out.println(store.returnItem("QCU5555", "QC7777"));
+	}
+	
 	public static void main(String[] args) {
 		Scanner userInput = new Scanner(System.in);
 		System.out.print("Welcome to Dynamic Super Miracle Store. Please enter your ID: ");
 		String userID = userInput.next();
-		StoreClient currentUser = new StoreClient(userID);
+		StoreClient currentUser = null;
 		try {
+			currentUser = new StoreClient(userID);
 			//System.out.println("Obtained a handle on server object: " + storeImpl);
 			currentUser.processCommands(userInput);
+			//currentUser.programTest();
 		}
 		catch (Exception e) {
 			System.out.println("ERROR : " + e) ;

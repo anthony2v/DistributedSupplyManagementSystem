@@ -6,7 +6,10 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class StoreImpl extends Thread {
+import javax.jws.WebService;
+
+@WebService(name="Store")
+public class StoreImpl extends Thread implements Store {
 	
 	private int portNumber;
 	private Map<String, Product> inventory;
